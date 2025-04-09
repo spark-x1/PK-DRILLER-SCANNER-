@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PKXMD-BOT Pairing Code</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: black;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    /* Video Background */
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(5px);
+      z-index: -1;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    /* Glassmorphic Box */
+    .box {
+      width: 350px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .box:hover {
+      transform: scale(1.05);
+    }
+
+    #text {
+      color: white;
+    }
+
+    .centered-text {
+      color: #f1f1f1;
+    }
+
+    .input-container {
+      display: flex;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 5px;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .input-container input {
+      border: none;
+      padding: 12px;
+      flex: 1;
+      border-radius: 8px 0 0 8px;
+      background: rgba(255, 255, 255, 0.3);
+      color: black;
+      font-weight: bold;
+      text-align: center;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .input-container button {
+      padding: 12px;
+      background: #EF6C33;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .input-container button:hover {
+      background: #ff4500;
+    }
+
+    /* Footer */
+    .footer {
+      position: absolute;
+      bottom: 10px;
+      color: white;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <video autoplay loop muted>
+    <source src="https://files.catbox.moe/p1bf81.mp4" type="video/mp4">
+  </video>
+  <div class="overlay"></div>
+
+  <div class="container">
+    <div class="box">
+      <div id="text">
+        <i class="fa fa-user"></i>
+        <h3 class="centered-text">PKXMD-BOT SESSION SCANNER</h3>
+        <h6 style="font-family: sans-serif; font-weight: bold; line-height: 2rem;">Made by Pkdriller</h6>
+        <h6 style="color: #EF6C33;">Enter Your Number with Country Code</h6>
+        <div class="input-container">
+          <input placeholder="254XXXXXXXXX" type="text" id="number">
+          <button id="submit">Create</button>
+        </div>
+        <a id="waiting-message" class="centered-text" style="display: none;">Generating session ID...</a>
+        <br><br>
+        <main id="pair"></main>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Thanks to Ibrahim Adams</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
+  <script>
+    let a = document.getElementById("pair");
+    let b = document.getElementById("submit");
+    let c = document.getElementById("number");
+
+    async function Copy() {
+      let text = document.getElementById("copy").innerText;
+      let obj = document.getElementById("copy");
+      await navigator.clipboard.writeText(obj.innerText.replace('CODE: ', ''));
+      obj.innerText = "COPIED";
+      obj.style = "color:Blue;font-weight:bold";
+      setTimeout(() => {
+        obj.innerText = text;
+        obj.style = "color:white;font-weight-bold";
+      }, 500);
+    }
+
+    b.addEventListener("click", async (e) => {
+      e.preventDefault();
+      if (!c.value) {
+        a.innerHTML = '<a style="color:lawngreen;font-weight:bold">Field blank</a><br><br>';
+      } else if (c.value.replace(/[^0-9]/g, "").length < 11) {
+        a.innerHTML = '<a style="color:lawngreen;font-weight:bold">Invalid Phone Number</a><br><br>';
+      } else {
+        const phone = c.value.replace(/[^0-9]/g, "");
+        c.type = "text";
+        c.value = "+" + phone;
+        c.style = "color:Blue;font-size:20px";
+        a.innerHTML = '<a style="color:lawngreen;font-weight:bold">Generating pairing code...</a><br><br>';
+        let { data } = await axios(`/code?number=${phone}`);
+        let code = data.code || "Service Unavailable";
+        a.innerHTML = `<font id="copy" onclick="Copy()" style="color:yellow;font-weight:bold">PAIRING CODE: <span style="color:white;font-weight:bold">${code}</span></font><br><br>`;
+      }
+    });
+  </script>
+</body>
+</html>
